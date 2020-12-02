@@ -44,7 +44,8 @@ function start() {
                             choices: [
                                 "View All Departments",
                                 "Add a Department",
-                                "Delete a Department"
+                                "Delete a Department",
+                                "View Employees in this Department"
                             ]
                         }).then(function (response2) {
                             switch (response2.action) {
@@ -56,6 +57,9 @@ function start() {
                                     break;
                                 case "Delete a Department":
                                     deleteDepts();
+                                    break;
+                                case "View Employees in this Department":
+                                    viewDeptEmployees();
                                     break;
                             }
                         })
@@ -75,10 +79,10 @@ function start() {
                         }).then(function (response3) {
                             switch (response3.action) {
                                 case "View All Roles":
-
+                                    viewRoles();
                                     break;
                                 case "Add a Role":
-
+                                    addRoles();
                                     break;
                                 case "Delete a Role":
 
@@ -120,6 +124,8 @@ function start() {
             }
         })
 }
+
+//DEPARTMENTS---------------------------------------
 
 function viewDepts() {
     connection.query("SELECT * FROM department", function (err, res) {
@@ -176,3 +182,35 @@ function deleteDepts() {
     })
 };
 
+function viewDeptEmploy(){
+
+}
+
+//ROLES---------------------------------------------
+
+function viewRoles() {
+    connection.query("SELECT * FROM role", function (err, res) {
+        if (err) throw err;
+        console.table(res);
+        connection.end();
+    })
+};
+
+function addRoles() {
+    inquirer
+        .prompt({
+            name: "roleName",
+            type: "input",
+            message: "What is the name of the role?"
+        })
+        .then(function (response) {
+            var query = "INSERT INTO role SET ?"
+            connection.query(query, { name: response.roleName }, function (err, res) {
+                if (err) throw err;
+                console.log(res.affectedRows + " Role Added!\n");
+
+                viewRoles();
+            });
+        });
+};
+//Employees-----------------------------------------
