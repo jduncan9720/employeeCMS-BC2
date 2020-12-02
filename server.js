@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer")
+const cTable = require('console.table');
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -51,7 +52,7 @@ function start() {
                                     viewDepts()
                                     break;
                                 case "Add a Department":
-
+                                    addDepts()
                                     break;
                                 case "Delete a Department":
 
@@ -120,12 +121,28 @@ function start() {
         })
 }
 
-function viewDepts(){
-    connection.query("SELECT * FROM department", function(err, res){
+function viewDepts() {
+    connection.query("SELECT * FROM department", function (err, res) {
         if (err) throw err;
-        console.log(res);
+        console.table(res);
         connection.end();
     })
 };
 
- 
+function addDepts() {
+    inquirer
+        .prompt({
+            name: "deptName",
+            type: "input",
+            message: "What is the name of the department?"
+        })
+        .then(function (response) {
+            var query = "INSERT INTO department SET ?"
+            connection.query( query, { name: response.deptName }, function(err, res){
+                    if (err) throw err;
+                    console.log(res.affectedRows + " Department Added!\n");
+                    
+                    viewDepts();
+                });
+            });
+        }
