@@ -49,13 +49,13 @@ function start() {
                         }).then(function (response2) {
                             switch (response2.action) {
                                 case "View All Departments":
-                                    viewDepts()
+                                    viewDepts();
                                     break;
                                 case "Add a Department":
-                                    addDepts()
+                                    addDepts();
                                     break;
                                 case "Delete a Department":
-
+                                    deleteDepts();
                                     break;
                             }
                         })
@@ -138,11 +138,41 @@ function addDepts() {
         })
         .then(function (response) {
             var query = "INSERT INTO department SET ?"
-            connection.query( query, { name: response.deptName }, function(err, res){
+            connection.query(query, { name: response.deptName }, function (err, res) {
+                if (err) throw err;
+                console.log(res.affectedRows + " Department Added!\n");
+
+                viewDepts();
+            });
+        });
+};
+
+function deleteDepts() {
+    var currentDept;
+    connection.query("SELECT name FROM department", function (err, res) {
+        if (err) throw err;
+        var deptArray = res.map(function (obj) {
+            return obj.name;
+        });
+        currentDept = deptArray;
+        console.log(currentDept)
+        inquirer
+            .prompt({
+                name: "deleteName",
+                type: "list",
+                message: "What is the name of the department you'd like to delete?",
+                choices: currentDept
+            })
+            .then(function (response) {
+                console.log(response.deleteName)
+                var query = "DELETE FROM department WHERE ?"
+                connection.query(query, { name: response.deleteName }, function (err, res) {
                     if (err) throw err;
-                    console.log(res.affectedRows + " Department Added!\n");
-                    
+                    console.log(res.affectedRows + " Department Deleted!\n");
+
                     viewDepts();
                 });
             });
-        }
+    })
+};
+
