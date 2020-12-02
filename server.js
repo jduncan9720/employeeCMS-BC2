@@ -48,7 +48,7 @@ function start() {
                         }).then(function (response2) {
                             switch (response2.action) {
                                 case "View All Departments":
-
+                                    viewDepts()
                                     break;
                                 case "Add a Department":
 
@@ -120,3 +120,12 @@ function start() {
         })
 }
 
+function viewDepts(){
+    connection.query("SELECT * FROM department", function(err, res){
+        if (err) throw err;
+        console.log(res);
+        connection.end();
+    })
+};
+
+ 
