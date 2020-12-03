@@ -203,15 +203,11 @@ function addRole() {
     connection.query("SELECT name, id FROM department", function (err, res) {
         if (err) throw err;
         var deptArray = res.map(function (obj) {
-            return obj.name;
+            return {name:obj.name, value:obj.id};
         });
-        var idArray = res.map(function (obj2) {
-            return obj2.id;
-        });
+
         currentDept = deptArray;
-        currentDeptID = idArray;
         console.log(currentDept)
-        console.log(currentDeptID)
         
     inquirer
         .prompt([{
@@ -228,7 +224,7 @@ function addRole() {
             name: "roleDept",
             type: "list",
             message: "Which department does this role belong to?",
-            choices: currentDeptID
+            choices: currentDept
         }
     ])
         .then(function (response) {
