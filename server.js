@@ -82,10 +82,10 @@ function start() {
                                     viewRoles();
                                     break;
                                 case "Add a Role":
-                                    addRoles();
+                                    addRole();
                                     break;
                                 case "Delete a Role":
-
+                                    deleteRole()
                                     break;
                             }
                         })
@@ -106,7 +106,7 @@ function start() {
                         }).then(function (response4) {
                             switch (response4.action) {
                                 case "View All Employees":
-
+                                viewEmployees()
                                     break;
                                 case "Add an Employee":
 
@@ -182,7 +182,7 @@ function deleteDepts() {
     })
 };
 
-function viewDeptEmploy(){
+function viewDeptEmployees(){
 
 }
 
@@ -196,21 +196,89 @@ function viewRoles() {
     })
 };
 
-function addRoles() {
+function addRole() {
+    var currentDept;
+    var currentDeptID;
+    
+    connection.query("SELECT name, id FROM department", function (err, res) {
+        if (err) throw err;
+        var deptArray = res.map(function (obj) {
+            return obj.name;
+        });
+        var idArray = res.map(function (obj2) {
+            return obj2.id;
+        });
+        currentDept = deptArray;
+        currentDeptID = idArray;
+        console.log(currentDept)
+        console.log(currentDeptID)
+        
     inquirer
-        .prompt({
+        .prompt([{
             name: "roleName",
             type: "input",
             message: "What is the name of the role?"
-        })
+        },
+        {
+            name: "roleSalary",
+            type: "input",
+            message: "How much is the salary of this role?"
+        },
+        {
+            name: "roleDept",
+            type: "list",
+            message: "Which department does this role belong to?",
+            choices: currentDeptID
+        }
+    ])
         .then(function (response) {
             var query = "INSERT INTO role SET ?"
-            connection.query(query, { name: response.roleName }, function (err, res) {
+            connection.query(query, { title: response.roleName, salary: response.roleSalary, department_id: response.roleDept}, function (err, res) {
                 if (err) throw err;
                 console.log(res.affectedRows + " Role Added!\n");
 
                 viewRoles();
             });
         });
+});
 };
+
+function deleteRole() {
+    var currentRole;
+    connection.query("SELECT title FROM role", function (err, res) {
+        if (err) throw err;
+        var titleArray = res.map(function (obj) {
+            return obj.title;
+        });
+        currentRole = titleArray;
+        console.log(currentRole)
+        inquirer
+            .prompt({
+                name: "deleteRole",
+                type: "list",
+                message: "What is the title of the role you'd like to delete?",
+                choices: currentRole
+            })
+            .then(function (response) {
+                console.log(response.deleteRole)
+                var query = "DELETE FROM role WHERE ?"
+                connection.query(query, { title: response.deleteRole }, function (err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + " Role Deleted!\n");
+
+                    viewRoles();
+                });
+            });
+    })
+};
+
+
 //Employees-----------------------------------------
+
+function viewEmployees() {
+    connection.query("SELECT * FROM employee", function (err, res) {
+        if (err) throw err;
+        console.table(res);
+        connection.end();
+    })
+};
