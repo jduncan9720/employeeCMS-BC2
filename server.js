@@ -112,7 +112,7 @@ function start() {
                                     addEmployee()
                                     break;
                                 case "Update Employee Role":
-
+                                    changeRole();
                                     break;
                                 case "Delete an Employee":
 
@@ -206,7 +206,6 @@ function addRole() {
         });
 
         currentDept = deptArray;
-        console.log(currentDept)
 
         inquirer
             .prompt([{
@@ -333,6 +332,53 @@ function addEmployee() {
                         viewEmployees()
                     });
                 });
-            });
         });
+    });
 };
+
+function changeRole() {
+    var currentRoles;
+    var currentEmployees;
+
+    connection.query("SELECT title, id from role", function (err, res) {
+        if (err) throw err;
+        var rolesArray = res.map(function (obj) {
+            return { name: obj.title, value: obj.id };
+        });
+
+        currentRoles = rolesArray;
+
+
+        connection.query("SELECT first_name, last_name, id from employee", function (err, res) {
+            if (err) throw err;
+            var employeeArray = res.map(function (obj) {
+                return { name: obj.first_name + " " + obj.last_name, value: obj.id };
+            });
+
+            currentEmployees = employeeArray;
+
+            inquirer
+                .prompt([
+                    {
+                        name: "employName",
+                        type: "list",
+                        message: "Which employee is changing roles?",
+                        choices: currentEmployees
+                    },
+                    {
+                        name: "newRole",
+                        type: "list",
+                        message: "What is their new role?",
+                        choices: currentRoles
+                    }
+                ]).then(function (response) {
+                    var query = "UPDATE employee SET ? WHERE ?";
+                    connection.query(query, [{ role_id: response.newRole }, { id: response.employName }], function (err, res){
+                        if (err) throw err;
+                        console.log(res.affectedRows + " Role Changed!\n");
+                        viewEmployees()
+                    })  
+                })
+        });
+    });
+}
