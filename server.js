@@ -106,10 +106,10 @@ function start() {
                         }).then(function (response4) {
                             switch (response4.action) {
                                 case "View All Employees":
-                                viewEmployees()
+                                    viewEmployees()
                                     break;
                                 case "Add an Employee":
-
+                                    addEmployee()
                                     break;
                                 case "Update Employee Role":
 
@@ -182,7 +182,7 @@ function deleteDepts() {
     })
 };
 
-function viewDeptEmployees(){
+function viewDeptEmployees() {
 
 }
 
@@ -198,45 +198,44 @@ function viewRoles() {
 
 function addRole() {
     var currentDept;
-    var currentDeptID;
-    
+
     connection.query("SELECT name, id FROM department", function (err, res) {
         if (err) throw err;
         var deptArray = res.map(function (obj) {
-            return {name:obj.name, value:obj.id};
+            return { name: obj.name, value: obj.id };
         });
 
         currentDept = deptArray;
         console.log(currentDept)
-        
-    inquirer
-        .prompt([{
-            name: "roleName",
-            type: "input",
-            message: "What is the name of the role?"
-        },
-        {
-            name: "roleSalary",
-            type: "input",
-            message: "How much is the salary of this role?"
-        },
-        {
-            name: "roleDept",
-            type: "list",
-            message: "Which department does this role belong to?",
-            choices: currentDept
-        }
-    ])
-        .then(function (response) {
-            var query = "INSERT INTO role SET ?"
-            connection.query(query, { title: response.roleName, salary: response.roleSalary, department_id: response.roleDept}, function (err, res) {
-                if (err) throw err;
-                console.log(res.affectedRows + " Role Added!\n");
 
-                viewRoles();
+        inquirer
+            .prompt([{
+                name: "roleName",
+                type: "input",
+                message: "What is the name of the role?"
+            },
+            {
+                name: "roleSalary",
+                type: "input",
+                message: "How much is the salary of this role?"
+            },
+            {
+                name: "roleDept",
+                type: "list",
+                message: "Which department does this role belong to?",
+                choices: currentDept
+            }
+            ])
+            .then(function (response) {
+                var query = "INSERT INTO role SET ?"
+                connection.query(query, { title: response.roleName, salary: response.roleSalary, department_id: response.roleDept }, function (err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + " Role Added!\n");
+
+                    viewRoles();
+                });
             });
-        });
-});
+    });
 };
 
 function deleteRole() {
@@ -277,4 +276,63 @@ function viewEmployees() {
         console.table(res);
         connection.end();
     })
+};
+
+function addEmployee() {
+    var currentRoles;
+    var currentEmployees;
+
+    connection.query("SELECT title, id from role", function (err, res) {
+        if (err) throw err;
+        var rolesArray = res.map(function (obj) {
+            return { name: obj.title, value: obj.id };
+        });
+
+        currentRoles = rolesArray;
+
+
+        connection.query("SELECT first_name, last_name, id from employee", function (err, res) {
+            if (err) throw err;
+            var employeeArray = res.map(function (obj) {
+                return { name: obj.first_name + " " + obj.last_name, value: obj.id };
+            });
+
+            currentEmployees = employeeArray;
+
+            inquirer
+                .prompt([
+                    {
+                        name: "firstName",
+                        type: "input",
+                        message: "What is the first name of the new employee?"
+                    },
+                    {
+                        name: "lastName",
+                        type: "input",
+                        message: "What is the last name of the new employee?"
+                    },
+                    {
+                        name: "employRole",
+                        type: "list",
+                        message: "What is this employee's role?",
+                        choices: currentRoles
+                    },
+                    {
+                        name: "employManage",
+                        type: "list",
+                        message: "Who, if anyone, manages this employee?",
+                        choices: currentEmployees
+                    }
+
+                ]).then(function (response) {
+                    var query = "INSERT INTO employee SET ?"
+                    connection.query(query, { first_name: response.firstName, last_name: response.lastName, role_id: response.employRole, manager_id: response.employManage }, function (err, res) {
+                        if (err) throw err;
+                        console.log(res.affectedRows + " Employee Added!\n");
+
+                        viewEmployees()
+                    });
+                });
+            });
+        });
 };
