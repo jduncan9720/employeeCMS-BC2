@@ -44,8 +44,7 @@ function start() {
                             choices: [
                                 "View All Departments",
                                 "Add a Department",
-                                "Delete a Department",
-                                "View Employees in this Department"
+                                "Delete a Department"
                             ]
                         }).then(function (response2) {
                             switch (response2.action) {
@@ -57,9 +56,6 @@ function start() {
                                     break;
                                 case "Delete a Department":
                                     deleteDepts();
-                                    break;
-                                case "View Employees in this Department":
-                                    viewDeptEmployees();
                                     break;
                             }
                         })
@@ -99,6 +95,7 @@ function start() {
                             message: "What would you like to do with Employees?",
                             choices: [
                                 "View All Employees",
+                                "View Employees by Department",
                                 "Add an Employee",
                                 "Update Employee Role",
                                 "Delete an Employee"
@@ -108,6 +105,9 @@ function start() {
                                 case "View All Employees":
                                     viewEmployees()
                                     break;
+                                    case "View Employees by Department":
+                                    employByDept()
+                                    break;
                                 case "Add an Employee":
                                     addEmployee()
                                     break;
@@ -115,7 +115,7 @@ function start() {
                                     changeRole();
                                     break;
                                 case "Delete an Employee":
-
+                                    deleteEmployee()
                                     break;
                             }
                         })
@@ -125,13 +125,33 @@ function start() {
         })
 }
 
+//START OVER--------------------------------------
+
+function doMore(){
+    inquirer.prompt(
+        {
+        name: "more",
+        type: "confirm",
+        message: "Would you like to do something else?",
+    }).then(function (response) {
+        switch (response.more){
+            case true:
+                start();
+                break;
+            case false:
+                console.log("Have a great day!")
+                connection.end();
+        }
+    })
+}
+
 //DEPARTMENTS---------------------------------------
 
 function viewDepts() {
     connection.query("SELECT * FROM department", function (err, res) {
         if (err) throw err;
         console.table(res);
-        connection.end();
+        doMore()
     })
 };
 
@@ -182,17 +202,13 @@ function deleteDepts() {
     })
 };
 
-function viewDeptEmployees() {
-
-}
-
 //ROLES---------------------------------------------
 
 function viewRoles() {
     connection.query("SELECT * FROM role", function (err, res) {
         if (err) throw err;
         console.table(res);
-        connection.end();
+        doMore()
     })
 };
 
@@ -273,7 +289,7 @@ function viewEmployees() {
     connection.query("SELECT * FROM employee", function (err, res) {
         if (err) throw err;
         console.table(res);
-        connection.end();
+        doMore()
     })
 };
 
@@ -381,4 +397,41 @@ function changeRole() {
                 })
         });
     });
+}
+
+function deleteEmployee(){
+    var currentEmployees;
+    connection.query("SELECT first_name, last_name, id from employee", function (err, res) {
+        if (err) throw err;
+        var employeeArray = res.map(function (obj) {
+            return { name: obj.first_name + " " + obj.last_name, value: obj.id };
+        });
+        currentEmployees = employeeArray;
+
+        inquirer
+            .prompt({
+                name: "deleteEmployee",
+                type: "list",
+                message: "What is the name of the emplyee you'd like to delete?",
+                choices: currentEmployees
+            })
+            .then(function (response) {
+                console.log(response.deleteEmployee)
+                var query = "DELETE FROM employee WHERE ?"
+                connection.query(query, { id: response.deleteEmployee }, function (err, res) {
+                    if (err) throw err;
+                    console.log(res.affectedRows + " Employee Deleted!\n");
+
+                    viewEmployees();
+                });
+            });
+    })
+};
+
+
+
+
+function employByDept(){
+    
+
 }
