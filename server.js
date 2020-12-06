@@ -428,10 +428,33 @@ function deleteEmployee(){
     })
 };
 
-
-
-
 function employByDept(){
-    
+    console.log("Still working on this one!")
+    doMore()
+//     var currentDept;
 
-}
+//     connection.query("SELECT name, id FROM department", function (err, res) {
+//         if (err) throw err;
+//         var deptArray = res.map(function (obj) {
+//             return { name: obj.name, value: obj.id };
+//         });
+
+//         currentDept = deptArray;
+
+//         inquirer
+//         .prompt({
+//             name: "whichDept",
+//             type: "list",
+//             message: "Which departments employees would you like to see?",
+//             choices: currentDept
+//         }).then( function(response){
+//             console.log(response)
+//             var query = "SELECT * FROM employee INNERJOIN role ON role.department_id = department.id INNERJOIN department ON department.id"
+//             connection.query(query, {id: response.whichDept}, function (err, res){
+//                 if (err) throw err;
+//                 console.table(res);
+//             })
+//         })
+
+// })
+};
